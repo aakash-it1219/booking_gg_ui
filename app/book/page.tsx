@@ -1308,14 +1308,16 @@ import {
     setSelectedService,
     setLoading,
     setCycles,
+    removeCycle,
 } from '@/lib/slices/orderSlice';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, Upload, MapPin } from 'lucide-react';
+import { CheckCircle2, Upload, MapPin, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import {
     getUserByIdAction,
     updateCustomerAction,
 } from '@/lib/actions/userActions';
+import { getCitiesAction } from '@/lib/actions/cityActions';
 import { getLocaleStorage } from '@/lib/utils';
 import { fetchStatic } from '@/lib/api/client';
 
@@ -1346,6 +1348,11 @@ function Book() {
         isLoading,
         error,
     } = useSelector((state: RootState) => state.order);
+    const { cities } = useSelector((state: RootState) => state.city);
+
+    useEffect(() => {
+        dispatch(getCitiesAction());
+    }, [dispatch]);
 
     const [customer, setCustomer] = useState({
         firstName: user?.firstName || '',
@@ -1537,13 +1544,13 @@ function Book() {
 
     console.log(cycles);
 
-    const handleNext = useCallback(() => {
+    const handleNext = useCallback(async () => {
         if (!validateRequiredFields()) {
             return;
         }
 
         if (currentStep === 'customer-details' && user) {
-            dispatch(
+            await dispatch(
                 updateCustomerAction({
                     firstName: customer.firstName || user.firstName || '',
                     lastName: customer.lastName || user.lastName || '',
@@ -1559,6 +1566,7 @@ function Book() {
                     longLat: customer.longLat || (user as any)?.longLat || '',
                 })
             );
+            await dispatch(getUserByIdAction());
             dispatch(setCurrentStep('cycle-details'));
         } else if (currentStep === 'cycle-details') {
             if (!termsAccepted) {
@@ -1625,8 +1633,11 @@ function Book() {
                             'uploads/cycles/' + newFileName
                         );
                         formData.append(`files`, renamedFile);
-                    } else{
-                        formData.append(`cycles[${index}][image]`, cycle?.image || '');
+                    } else {
+                        formData.append(
+                            `cycles[${index}][image]`,
+                            cycle?.image || ''
+                        );
                     }
                 });
 
@@ -1769,17 +1780,17 @@ function Book() {
                             onClick={() => dispatch(addNewCycle())}
                             className='text-[#fbbf24] hover:text-[#f59e0b] hover:bg-[#2a2b2d]'
                         >
-                            + Add more Cycle
+                            + Add Cycle
                         </Button>
                     </div>
 
                     {cycles.map((cycle, index) => (
-                        <div
-                            key={cycle.id ?? `cycle-${index}`}
-                            className='space-y-4'
-                        >
-                            {cycles.length > 1 && (
-                                <div className='flex w-full justify-between items-center'>
+                        <>
+                            <div
+                                key={cycle.id ?? `cycle-${index}`}
+                                className='space-y-4 border border-gray-200 rounded-lg p-4'
+                            >
+                                <div className='flex flex-col md:flex-row w-full justify-between items-start gap-2 md:gap-0'>
                                     <div className='flex gap-4 items-center'>
                                         <Checkbox
                                             id={(index + 1).toString()}
@@ -1796,11 +1807,15 @@ function Book() {
                                             className='border-[#fbbf24] data-[state=checked]:bg-[#fbbf24] data-[state=checked]:text-black shrink-0 h-4 w-4 border-2'
                                         />
                                         <h4 className='font-medium text-black'>
-                                            Cycle {index + 1}
+                                            Cycle {index + 1}{' '}
+                                            <span className='text-xs'>
+                                                (Select for booking order)
+                                            </span>
                                         </h4>
                                     </div>
                                     <div className='flex gap-2 items-center'>
                                         <label
+                                            className='font-medium text-sm'
                                             htmlFor={`cycle${(
                                                 index + 1
                                             ).toString()}`}
@@ -1848,400 +1863,340 @@ function Book() {
                                                 </option>
                                             ))}
                                         </select>
+                                        {cycles.length > 1 && (
+                                            <Button
+                                                variant='ghost'
+                                                size='icon'
+                                                onClick={() =>
+                                                    dispatch(removeCycle(index))
+                                                }
+                                                className='text-red-500 hover:text-red-700 hover:bg-red-50'
+                                            >
+                                                <Trash2 className='w-4 h-4' />
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
-                            )}
 
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                <div className='space-y-2'>
-                                    <Label className='text-black'>
-                                        Cycle Brand*
-                                    </Label>
-                                    <Input
-                                        required
-                                        value={cycle.name}
-                                        onChange={(e) => {
-                                            dispatch(
-                                                updateCycleDetails({
-                                                    index,
-                                                    field: 'name',
-                                                    value: e.target.value,
-                                                })
-                                            );
-                                            if (
+                                <div
+                                    className={`grid grid-cols-1 md:grid-cols-2 gap-4 transition-opacity duration-200 ${
+                                        !cycle.order
+                                            ? 'opacity-50'
+                                            : 'opacity-100'
+                                    }`}
+                                >
+                                    <div className='space-y-2'>
+                                        <Label className='text-black'>
+                                            Cycle Brand*
+                                        </Label>
+                                        <Input
+                                            required
+                                            disabled={!cycle.order}
+                                            value={cycle.name}
+                                            onChange={(e) => {
+                                                dispatch(
+                                                    updateCycleDetails({
+                                                        index,
+                                                        field: 'name',
+                                                        value: e.target.value,
+                                                    })
+                                                );
+                                                if (
+                                                    validationErrors[
+                                                        `cycle-${index}-brand`
+                                                    ]
+                                                ) {
+                                                    setValidationErrors(
+                                                        (prev) => {
+                                                            const newErrors = {
+                                                                ...prev,
+                                                            };
+                                                            delete newErrors[
+                                                                `cycle-${index}-brand`
+                                                            ];
+                                                            return newErrors;
+                                                        }
+                                                    );
+                                                }
+                                            }}
+                                            placeholder='Enter brand name'
+                                            className={`border-[#4a4b4d] text-black placeholder:text-gray-600 ${
                                                 validationErrors[
                                                     `cycle-${index}-brand`
                                                 ]
-                                            ) {
-                                                setValidationErrors((prev) => {
-                                                    const newErrors = {
-                                                        ...prev,
-                                                    };
-                                                    delete newErrors[
+                                                    ? 'border-red-500'
+                                                    : ''
+                                            }`}
+                                        />
+                                        {validationErrors[
+                                            `cycle-${index}-brand`
+                                        ] && (
+                                            <p className='text-red-500 text-sm'>
+                                                {
+                                                    validationErrors[
                                                         `cycle-${index}-brand`
-                                                    ];
-                                                    return newErrors;
-                                                });
-                                            }
-                                        }}
-                                        placeholder='Enter brand name'
-                                        className={`border-[#4a4b4d] text-black placeholder:text-gray-600 ${
+                                                    ]
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className='space-y-2'>
+                                        <Label className='text-black'>
+                                            Cycle Type*
+                                        </Label>
+                                        <RadioGroup
+                                            value={cycle.type}
+                                            disabled={!cycle.order}
+                                            onValueChange={(value) => {
+                                                dispatch(
+                                                    updateCycleDetails({
+                                                        index,
+                                                        field: 'type',
+                                                        value,
+                                                    })
+                                                );
+                                                if (
+                                                    validationErrors[
+                                                        `cycle-${index}-type`
+                                                    ]
+                                                ) {
+                                                    setValidationErrors(
+                                                        (prev) => {
+                                                            const newErrors = {
+                                                                ...prev,
+                                                            };
+                                                            delete newErrors[
+                                                                `cycle-${index}-type`
+                                                            ];
+                                                            return newErrors;
+                                                        }
+                                                    );
+                                                }
+                                            }}
+                                            className='flex space-x-6'
+                                        >
+                                            <div className='flex items-center space-x-2'>
+                                                <RadioGroupItem
+                                                    value='gear'
+                                                    id={`gear-${index}`}
+                                                    className='border-[#fbbf24] text-[#fbbf24]'
+                                                />
+                                                <Label
+                                                    htmlFor={`gear-${index}`}
+                                                    className='text-black'
+                                                >
+                                                    Gear
+                                                </Label>
+                                            </div>
+                                            <div className='flex items-center space-x-2'>
+                                                <RadioGroupItem
+                                                    value='nonGear'
+                                                    id={`nonGear-${index}`}
+                                                    className='border-[#fbbf24] text-[#fbbf24]'
+                                                />
+                                                <Label
+                                                    htmlFor={`nonGear-${index}`}
+                                                    className='text-black'
+                                                >
+                                                    Non - gear
+                                                </Label>
+                                            </div>
+                                        </RadioGroup>
+                                        {validationErrors[
+                                            `cycle-${index}-type`
+                                        ] && (
+                                            <p className='text-red-500 text-sm'>
+                                                {
+                                                    validationErrors[
+                                                        `cycle-${index}-type`
+                                                    ]
+                                                }
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className='space-y-2'>
+                                    <Label className='text-black'>
+                                        Upload Bicycle photo*
+                                    </Label>
+                                    <div
+                                        className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-[#fbbf24] transition-colors cursor-pointer ${
                                             validationErrors[
-                                                `cycle-${index}-brand`
+                                                `cycle-${index}-photo`
                                             ]
                                                 ? 'border-red-500'
-                                                : ''
+                                                : 'border-[#4a4b4d]'
                                         }`}
-                                    />
-                                    {validationErrors[
-                                        `cycle-${index}-brand`
-                                    ] && (
-                                        <p className='text-red-500 text-sm'>
-                                            {
-                                                validationErrors[
-                                                    `cycle-${index}-brand`
-                                                ]
-                                            }
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className='space-y-2'>
-                                    <Label className='text-black'>
-                                        Cycle Type*
-                                    </Label>
-                                    <RadioGroup
-                                        value={cycle.type}
-                                        onValueChange={(value) => {
-                                            dispatch(
-                                                updateCycleDetails({
-                                                    index,
-                                                    field: 'type',
-                                                    value,
-                                                })
-                                            );
-                                            if (
-                                                validationErrors[
-                                                    `cycle-${index}-type`
-                                                ]
-                                            ) {
-                                                setValidationErrors((prev) => {
-                                                    const newErrors = {
-                                                        ...prev,
-                                                    };
-                                                    delete newErrors[
-                                                        `cycle-${index}-type`
-                                                    ];
-                                                    return newErrors;
-                                                });
-                                            }
-                                        }}
-                                        className='flex space-x-6'
                                     >
-                                        <div className='flex items-center space-x-2'>
-                                            <RadioGroupItem
-                                                value='gear'
-                                                id={`gear-${index}`}
-                                                className='border-[#fbbf24] text-[#fbbf24]'
-                                            />
-                                            <Label
-                                                htmlFor={`gear-${index}`}
-                                                className='text-black'
-                                            >
-                                                Gear
-                                            </Label>
-                                        </div>
-                                        <div className='flex items-center space-x-2'>
-                                            <RadioGroupItem
-                                                value='nonGear'
-                                                id={`nonGear-${index}`}
-                                                className='border-[#fbbf24] text-[#fbbf24]'
-                                            />
-                                            <Label
-                                                htmlFor={`nonGear-${index}`}
-                                                className='text-black'
-                                            >
-                                                Non - gear
-                                            </Label>
-                                        </div>
-                                    </RadioGroup>
-                                    {validationErrors[
-                                        `cycle-${index}-type`
-                                    ] && (
-                                        <p className='text-red-500 text-sm'>
-                                            {
-                                                validationErrors[
-                                                    `cycle-${index}-type`
-                                                ]
-                                            }
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
+                                        <input
+                                            type='file'
+                                            accept='image/*'
+                                            disabled={!cycle.order}
+                                            onChange={(e) => {
+                                                const file =
+                                                    e.target.files?.[0];
+                                                if (file) {
+                                                    handleFileUpload(
+                                                        index,
+                                                        file
+                                                    );
+                                                }
+                                            }}
+                                            className='hidden'
+                                            id={`file-upload-${index}`}
+                                        />
 
-                            {/* <div className='space-y-2'>
-                                <Label className='text-black'>
-                                    Upload Bicycle photo*
-                                </Label>
-                                <div
-                                    className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-[#fbbf24] transition-colors cursor-pointer ${
-                                        validationErrors[`cycle-${index}-photo`]
-                                            ? 'border-red-500'
-                                            : 'border-[#4a4b4d]'
-                                    }`}
-                                >
-                                    <input
-                                        type='file'
-                                        accept='image/*'
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                                handleFileUpload(index, file);
-                                            }
-                                        }}
-                                        className='hidden'
-                                        id={`file-upload-${index}`}
-                                    />
-                                    <label
-                                        htmlFor={`file-upload-${index}`}
-                                        className='cursor-pointer'
-                                    >
-                                        {cycle.image instanceof File ? (
-                                            <div className='space-y-3'>
-                                                <div className='flex items-center justify-center'>
-                                                    <img
-                                                        src={
-                                                            URL.createObjectURL(
+                                        <label
+                                            htmlFor={`file-upload-${index}`}
+                                            className='cursor-pointer'
+                                        >
+                                            {/* CASE 1: File object uploaded */}
+                                            {cycle.image instanceof File ? (
+                                                <div className='space-y-3'>
+                                                    <div className='flex items-center justify-center'>
+                                                        <img
+                                                            src={URL.createObjectURL(
                                                                 cycle.image
-                                                            ) ||
-                                                            '/placeholder.svg' ||
-                                                            '/placeholder.svg'
-                                                        }
-                                                        alt='Cycle preview'
-                                                        className='w-24 h-24 object-cover rounded-lg'
-                                                    />
+                                                            )}
+                                                            alt='Cycle preview'
+                                                            className='w-24 h-24 object-cover rounded-lg'
+                                                        />
+                                                    </div>
+                                                    <div className='flex items-center justify-center space-x-2'>
+                                                        <CheckCircle2 className='w-5 h-5 text-green-500' />
+                                                        <span className='text-green-600 text-sm font-medium'>
+                                                            {cycle.image.name}
+                                                        </span>
+                                                    </div>
+                                                    <div className='flex items-center justify-center space-x-2'>
+                                                        <Button
+                                                            type='button'
+                                                            variant='outline'
+                                                            size='sm'
+                                                            disabled={
+                                                                !cycle.order
+                                                            }
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                document
+                                                                    .getElementById(
+                                                                        `file-upload-${index}`
+                                                                    )
+                                                                    ?.click();
+                                                            }}
+                                                            className='text-[#fbbf24] border-[#fbbf24] hover:bg-[#fbbf24] hover:text-black'
+                                                        >
+                                                            Change Image
+                                                        </Button>
+                                                        <Button
+                                                            type='button'
+                                                            variant='outline'
+                                                            size='sm'
+                                                            disabled={
+                                                                !cycle.order
+                                                            }
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                handleRemoveImage(
+                                                                    index
+                                                                );
+                                                            }}
+                                                            className='text-red-500 border-red-500 hover:bg-red-500 hover:text-white'
+                                                        >
+                                                            Remove
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                                <div className='flex items-center justify-center space-x-2'>
-                                                    <CheckCircle2 className='w-5 h-5 text-green-500' />
-                                                    <span className='text-green-600 text-sm font-medium'>
-                                                        {cycle.image.name}
-                                                    </span>
+                                            ) : cycle.image &&
+                                              typeof cycle.image ===
+                                                  'string' ? (
+                                                // CASE 2: Existing URL string
+                                                <div className='space-y-3'>
+                                                    <div className='flex items-center justify-center'>
+                                                        <img
+                                                            src={`${fetchStatic}/${cycle.image}`}
+                                                            alt='Cycle preview'
+                                                            className='w-24 h-24 object-cover rounded-lg'
+                                                        />
+                                                    </div>
+                                                    <div className='flex items-center justify-center space-x-2'>
+                                                        <CheckCircle2 className='w-5 h-5 text-green-500' />
+                                                        <span className='text-green-600 text-sm font-medium'>
+                                                            Existing Image
+                                                        </span>
+                                                    </div>
+                                                    <div className='flex items-center justify-center space-x-2'>
+                                                        <Button
+                                                            type='button'
+                                                            variant='outline'
+                                                            size='sm'
+                                                            disabled={
+                                                                !cycle.order
+                                                            }
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                document
+                                                                    .getElementById(
+                                                                        `file-upload-${index}`
+                                                                    )
+                                                                    ?.click();
+                                                            }}
+                                                            className='text-[#fbbf24] border-[#fbbf24] hover:bg-[#fbbf24] hover:text-black'
+                                                        >
+                                                            Change Image
+                                                        </Button>
+                                                        <Button
+                                                            type='button'
+                                                            variant='outline'
+                                                            size='sm'
+                                                            disabled={
+                                                                !cycle.order
+                                                            }
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                handleRemoveImage(
+                                                                    index
+                                                                );
+                                                            }}
+                                                            className='text-red-500 border-red-500 hover:bg-red-500 hover:text-white'
+                                                        >
+                                                            Remove
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                                <div className='flex items-center justify-center space-x-2'>
-                                                    <Button
-                                                        type='button'
-                                                        variant='outline'
-                                                        size='sm'
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            document
-                                                                .getElementById(
-                                                                    `file-upload-${index}`
-                                                                )
-                                                                ?.click();
-                                                        }}
-                                                        className='text-[#fbbf24] border-[#fbbf24] hover:bg-[#fbbf24] hover:text-black'
-                                                    >
-                                                        Change Image
-                                                    </Button>
-                                                    <Button
-                                                        type='button'
-                                                        variant='outline'
-                                                        size='sm'
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleRemoveImage(
-                                                                index
-                                                            );
-                                                        }}
-                                                        className='text-red-500 border-red-500 hover:bg-red-500 hover:text-white'
-                                                    >
-                                                        Remove
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <Upload className='w-8 h-8 text-gray-600 mx-auto mb-2' />
-                                                <p className='text-gray-600 text-sm'>
-                                                    Click to upload or drag and
-                                                    drop
-                                                </p>
-                                                <p className='text-gray-500 text-xs'>
-                                                    PNG, JPG, GIF up to 10MB
-                                                </p>
-                                            </>
-                                        )}
-                                    </label>
-                                </div>
-                                {validationErrors[`cycle-${index}-photo`] && (
-                                    <p className='text-red-500 text-sm'>
-                                        {
-                                            validationErrors[
-                                                `cycle-${index}-photo`
-                                            ]
-                                        }
-                                    </p>
-                                )}
-                            </div> */}
-                            <div className='space-y-2'>
-                                <Label className='text-black'>
-                                    Upload Bicycle photo*
-                                </Label>
-                                <div
-                                    className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-[#fbbf24] transition-colors cursor-pointer ${
-                                        validationErrors[`cycle-${index}-photo`]
-                                            ? 'border-red-500'
-                                            : 'border-[#4a4b4d]'
-                                    }`}
-                                >
-                                    <input
-                                        type='file'
-                                        accept='image/*'
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                                handleFileUpload(index, file);
+                                            ) : (
+                                                // CASE 3: No image yet
+                                                <>
+                                                    <Upload className='w-8 h-8 text-gray-600 mx-auto mb-2' />
+                                                    <p className='text-gray-600 text-sm'>
+                                                        Click to upload or drag
+                                                        and drop
+                                                    </p>
+                                                    <p className='text-gray-500 text-xs'>
+                                                        PNG, JPG, GIF up to 10MB
+                                                    </p>
+                                                </>
+                                            )}
+                                        </label>
+                                    </div>
+
+                                    {validationErrors[
+                                        `cycle-${index}-photo`
+                                    ] && (
+                                        <p className='text-red-500 text-sm'>
+                                            {
+                                                validationErrors[
+                                                    `cycle-${index}-photo`
+                                                ]
                                             }
-                                        }}
-                                        className='hidden'
-                                        id={`file-upload-${index}`}
-                                    />
-
-                                    <label
-                                        htmlFor={`file-upload-${index}`}
-                                        className='cursor-pointer'
-                                    >
-                                        {/* CASE 1: File object uploaded */}
-                                        {cycle.image instanceof File ? (
-                                            <div className='space-y-3'>
-                                                <div className='flex items-center justify-center'>
-                                                    <img
-                                                        src={URL.createObjectURL(
-                                                            cycle.image
-                                                        )}
-                                                        alt='Cycle preview'
-                                                        className='w-24 h-24 object-cover rounded-lg'
-                                                    />
-                                                </div>
-                                                <div className='flex items-center justify-center space-x-2'>
-                                                    <CheckCircle2 className='w-5 h-5 text-green-500' />
-                                                    <span className='text-green-600 text-sm font-medium'>
-                                                        {cycle.image.name}
-                                                    </span>
-                                                </div>
-                                                <div className='flex items-center justify-center space-x-2'>
-                                                    <Button
-                                                        type='button'
-                                                        variant='outline'
-                                                        size='sm'
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            document
-                                                                .getElementById(
-                                                                    `file-upload-${index}`
-                                                                )
-                                                                ?.click();
-                                                        }}
-                                                        className='text-[#fbbf24] border-[#fbbf24] hover:bg-[#fbbf24] hover:text-black'
-                                                    >
-                                                        Change Image
-                                                    </Button>
-                                                    <Button
-                                                        type='button'
-                                                        variant='outline'
-                                                        size='sm'
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleRemoveImage(
-                                                                index
-                                                            );
-                                                        }}
-                                                        className='text-red-500 border-red-500 hover:bg-red-500 hover:text-white'
-                                                    >
-                                                        Remove
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ) : cycle.image &&
-                                          typeof cycle.image === 'string' ? (
-                                            // CASE 2: Existing URL string
-                                            <div className='space-y-3'>
-                                                <div className='flex items-center justify-center'>
-                                                    <img
-                                                        src={`${fetchStatic}/${cycle.image}`}
-                                                        alt='Cycle preview'
-                                                        className='w-24 h-24 object-cover rounded-lg'
-                                                    />
-                                                </div>
-                                                <div className='flex items-center justify-center space-x-2'>
-                                                    <CheckCircle2 className='w-5 h-5 text-green-500' />
-                                                    <span className='text-green-600 text-sm font-medium'>
-                                                        Existing Image
-                                                    </span>
-                                                </div>
-                                                <div className='flex items-center justify-center space-x-2'>
-                                                    <Button
-                                                        type='button'
-                                                        variant='outline'
-                                                        size='sm'
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            document
-                                                                .getElementById(
-                                                                    `file-upload-${index}`
-                                                                )
-                                                                ?.click();
-                                                        }}
-                                                        className='text-[#fbbf24] border-[#fbbf24] hover:bg-[#fbbf24] hover:text-black'
-                                                    >
-                                                        Change Image
-                                                    </Button>
-                                                    <Button
-                                                        type='button'
-                                                        variant='outline'
-                                                        size='sm'
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleRemoveImage(
-                                                                index
-                                                            );
-                                                        }}
-                                                        className='text-red-500 border-red-500 hover:bg-red-500 hover:text-white'
-                                                    >
-                                                        Remove
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            // CASE 3: No image yet
-                                            <>
-                                                <Upload className='w-8 h-8 text-gray-600 mx-auto mb-2' />
-                                                <p className='text-gray-600 text-sm'>
-                                                    Click to upload or drag and
-                                                    drop
-                                                </p>
-                                                <p className='text-gray-500 text-xs'>
-                                                    PNG, JPG, GIF up to 10MB
-                                                </p>
-                                            </>
-                                        )}
-                                    </label>
+                                        </p>
+                                    )}
                                 </div>
-
-                                {validationErrors[`cycle-${index}-photo`] && (
-                                    <p className='text-red-500 text-sm'>
-                                        {
-                                            validationErrors[
-                                                `cycle-${index}-photo`
-                                            ]
-                                        }
-                                    </p>
-                                )}
                             </div>
-
                             <hr className='my-4' />
-                        </div>
+                        </>
                     ))}
                 </div>
 
@@ -2594,9 +2549,14 @@ function Book() {
                                 <SelectValue placeholder='Select city' />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value='3'>Pune</SelectItem>
-                                <SelectItem value='1'>Mumbai</SelectItem>
-                                <SelectItem value='4'>Bengaluru</SelectItem>
+                                {cities.map((city) => (
+                                    <SelectItem
+                                        key={city.id}
+                                        value={city.id.toString()}
+                                    >
+                                        {city.name}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                         {validationErrors.cityId && (
