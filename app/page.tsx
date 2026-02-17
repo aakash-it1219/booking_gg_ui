@@ -187,7 +187,6 @@ export default function HomePage() {
             <StatsSection />
             <BrandsSection />
             <FAQSection />
-            <FAQSection />
             <Footer />
             {showTopBtn && (
                 <button
