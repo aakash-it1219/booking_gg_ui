@@ -208,7 +208,10 @@ export default function Footer() {
                 </div>
 
                 <div className='border-t border-[#4a4b4d] mt-8 pt-8 text-center text-sm text-gray-300'>
-                    <p>&copy; 2026 GearGrow Cycle. All rights reserved.</p>
+                    <p>
+                        &copy; {new Date().getFullYear()} GearGrow Cycle. All
+                        rights reserved.
+                    </p>
                 </div>
             </div>
         </motion.footer>
