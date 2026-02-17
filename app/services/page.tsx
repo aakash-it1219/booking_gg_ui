@@ -193,8 +193,9 @@ export default function ServicesPage() {
                                 <div className='bg-[#3c3d3f] rounded-2xl border-4 border-[#fbbf24]'>
                                     <Image
                                         src={
-                                            `/images/service${currentService.orderNo}.png` ||
-                                            '/images/about2.png'
+                                            currentService.orderNo < 5
+                                                ? `/images/service${currentService.orderNo}.png`
+                                                : '/bicycle-maintenance-setup.png'
                                             // currentService.serviceImageUrl
                                         }
                                         alt={currentService.serviceName}
