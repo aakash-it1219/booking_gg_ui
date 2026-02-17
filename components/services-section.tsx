@@ -97,7 +97,7 @@ export default function ServicesSection() {
     }, [activeServices, selectedServiceId]);
 
     useEffect(() => {
-        if (selectedServiceId && scrollRef.current) {
+        if (selectedServiceId && scrollRef.current && isMobile) {
             const index = activeServices.findIndex(
                 (service) => service._id === selectedServiceId
             );
