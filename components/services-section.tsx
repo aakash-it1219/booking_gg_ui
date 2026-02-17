@@ -159,7 +159,7 @@ export default function ServicesSection() {
         return (
             <section className='bg-[#3c3d3f]'>
                 <div className='relative w-full h-auto flex items-center justify-center overflow-hidden py-20 px-4 lg:px-0'>
-                    <div className='container mx-auto px-4 lg:px-16 py-16 bg-black opacity-50 rounded-2xl max-w-6xl relative'>
+                    <div className='container mx-auto px-4 lg:px-16 py-16 bg-black/50 rounded-2xl max-w-6xl relative'>
                         <div className='text-center text-white'>
                             <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-[#f5b41d] mx-auto mb-4'></div>
                             <p>Loading services...</p>
@@ -182,7 +182,7 @@ export default function ServicesSection() {
                     />
                 </div>
 
-                <div className='container mx-auto px-4 lg:px-16 py-16 bg-black opacity-50 rounded-2xl max-w-6xl relative'>
+                <div className='container mx-auto px-4 lg:px-16 py-16 bg-black/50 rounded-2xl max-w-6xl relative'>
                     <motion.div
                         className='text-center mb-12'
                         initial={{ opacity: 0, y: 20 }}
