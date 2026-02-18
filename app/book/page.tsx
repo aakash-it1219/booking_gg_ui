@@ -76,6 +76,10 @@ function Book() {
         dispatch(getCitiesAction());
     }, [dispatch]);
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [currentStep]);
+
     const [customer, setCustomer] = useState({
         firstName: user?.firstName || '',
         lastName: user?.lastName || '',
