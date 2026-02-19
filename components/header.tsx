@@ -26,6 +26,7 @@ export default function Header() {
         { name: 'For Business', href: '/for-business' },
         { name: 'Stories', href: '/stories' },
         { name: 'About', href: '/about' },
+        { name: 'Contact', href: '/contact' },
     ];
 
     const handleLogout = () => {
@@ -55,7 +56,7 @@ export default function Header() {
                             className='w-8 h-8'
                         />
                         <span className='text-xl font-bold text-white'>
-                            GearGrow Cycle
+                            Gear Grow Cycle
                         </span>
                     </Link>
 
