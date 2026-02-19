@@ -10,8 +10,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { getLocaleStorage } from '@/lib/utils';
 
 export default function Header() {
+    const { cities } = useSelector((state: RootState) => state.city);
     const dispatch = useDispatch();
     const pathname = usePathname();
     const mobileMenuOpen = useSelector(
@@ -37,6 +39,13 @@ export default function Header() {
         }
     };
 
+    const cityId = getLocaleStorage('cityId');
+    const city = cities.find((city) =>
+        cityId && cityId !== ''
+            ? city.id === parseInt(cityId)
+            : city.id === null
+    );
+
     return (
         <motion.header
             className='bg-[#3c3d3f] border-b border-[#4a4b4d]'
@@ -57,6 +66,9 @@ export default function Header() {
                         />
                         <span className='text-xl font-bold text-white'>
                             Gear Grow Cycle
+                            <span className='block text-sm text-gray-400'>
+                                {city?.name}
+                            </span>
                         </span>
                     </Link>
 
