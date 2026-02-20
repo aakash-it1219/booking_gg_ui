@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { X } from 'lucide-react';
 import type { AppDispatch } from '@/lib/store';
 import { setCityPopup } from '@/lib/slices/uiSlice';
+import { setSelectedCityId as setReduxCityId } from '@/lib/slices/citySlice';
 import { getCitiesAction } from '@/lib/actions/cityActions';
 import { getLocaleStorage, setLocaleStorage } from '@/lib/utils';
 
@@ -22,11 +23,13 @@ export default function CityPopup() {
         dispatch(getCitiesAction());
     }, [dispatch]);
 
-    // On mount: if no city saved, show popup
+    // On mount: if no city saved, show popup; otherwise hydrate Redux
     useEffect(() => {
         const savedCityId = getLocaleStorage('cityId');
         if (!savedCityId) {
             dispatch(setCityPopup(true));
+        } else {
+            dispatch(setReduxCityId(parseInt(savedCityId)));
         }
         setInitialCheckDone(true);
     }, [dispatch]);
@@ -51,6 +54,7 @@ export default function CityPopup() {
     const handleConfirm = useCallback(() => {
         if (selectedCityId !== null) {
             setLocaleStorage('cityId', selectedCityId.toString());
+            dispatch(setReduxCityId(selectedCityId));
             dispatch(setCityPopup(false));
         }
     }, [selectedCityId, dispatch]);

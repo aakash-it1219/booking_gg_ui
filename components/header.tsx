@@ -12,10 +12,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { getLocaleStorage } from '@/lib/utils';
 
 export default function Header() {
-    const { cities } = useSelector((state: RootState) => state.city);
+    const { cities, selectedCityId } = useSelector(
+        (state: RootState) => state.city
+    );
     const dispatch = useDispatch();
     const pathname = usePathname();
     const mobileMenuOpen = useSelector(
@@ -41,11 +42,8 @@ export default function Header() {
         }
     };
 
-    const cityId = getLocaleStorage('cityId');
     const city = cities.find((city) =>
-        cityId && cityId !== ''
-            ? city.id === parseInt(cityId)
-            : city.id === null
+        selectedCityId !== null ? city.id === selectedCityId : city.id === null
     );
 
     // Close mobile menu when clicking outside header
