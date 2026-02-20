@@ -7,7 +7,9 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { getHomePageDataAction } from '@/lib/actions/contentActions';
+import type { AppDispatch } from '@/lib/store';
 import Link from 'next/link';
 
 const heroImages = [
@@ -59,8 +61,17 @@ const brands = [
 
 export default function AboutPage() {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const dispatch = useDispatch<AppDispatch>();
 
-    const { homePageData } = useSelector((state: any) => state.content);
+    const { homePageData, isLoading } = useSelector(
+        (state: any) => state.content
+    );
+
+    useEffect(() => {
+        if (!homePageData && !isLoading) {
+            dispatch(getHomePageDataAction());
+        }
+    }, [dispatch, homePageData, isLoading]);
 
     const stats = homePageData?.s6?.data || [
         {
