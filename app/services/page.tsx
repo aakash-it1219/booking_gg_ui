@@ -65,6 +65,7 @@ function ServicesContent() {
     const { services, isLoading } = useSelector(
         (state: RootState) => state.services
     );
+    const { selectedCityId } = useSelector((state: RootState) => state.city);
 
     const activeServices =
         services
@@ -72,8 +73,10 @@ function ServicesContent() {
             .sort((a: Service, b: Service) => a.orderNo - b.orderNo) || [];
 
     useEffect(() => {
-        dispatch(getServicesAction({ city: 3 }));
-    }, [dispatch]);
+        if (selectedCityId !== null) {
+            dispatch(getServicesAction({ city: selectedCityId }));
+        }
+    }, [dispatch, selectedCityId]);
 
     useEffect(() => {
         if (activeServices.length > 0 && selectedServiceId === null) {
