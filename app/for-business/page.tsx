@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import Header from '@/components/header';
+
 import Footer from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -164,16 +164,12 @@ export default function ForBusinessPage() {
             window.location.href = '/login';
         } else {
             // Proceed with booking
-            alert(
-                'For Business email us at gearupcycle@gmail.com'
-            );
+            alert('For Business email us at gearupcycle@gmail.com');
         }
     };
 
     return (
         <div className='min-h-screen bg-[#060608] text-white'>
-            <Header />
-
             {/* Service Tabs */}
             <section className='py-8 bg-[#3c3d3f]'>
                 <div className='container mx-auto px-4'>

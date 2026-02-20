@@ -1,14 +1,11 @@
 'use client';
 
-import Header from '@/components/header';
 import Footer from '@/components/footer';
 import Image from 'next/image';
 
 export default function TermsPage() {
     return (
         <div className='min-h-screen bg-[#060608] text-white'>
-            <Header />
-
             {/* Hero Section with Logo and Title */}
             <section className='py-16 bg-[#060608]'>
                 <div className='container mx-auto px-4'>

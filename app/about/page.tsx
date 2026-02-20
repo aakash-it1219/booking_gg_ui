@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Header from '@/components/header';
+
 import Footer from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -97,8 +97,6 @@ export default function AboutPage() {
 
     return (
         <div className='min-h-screen bg-[#060608] text-white'>
-            <Header />
-
             {/* Hero Image Carousel */}
             <section className='py-8 bg-[#060608]'>
                 <div className='container mx-auto px-4'>

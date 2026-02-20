@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Header from '@/components/header';
+
 import Footer from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1246,8 +1246,6 @@ export function Account() {
 
     return (
         <div className='min-h-screen bg-[#3c3d3f] text-white'>
-            <Header />
-
             <div className='container mx-auto px-4 py-8'>
                 <div className='text-center mb-8'>
                     <h1 className='text-3xl font-bold text-[#fbbf24]'>

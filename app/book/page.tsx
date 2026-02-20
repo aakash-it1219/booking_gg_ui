@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Header from '@/components/header';
+
 import Footer from '@/components/footer';
 import ErrorBoundary from '@/components/error-boundry';
 import { Button } from '@/components/ui/button';
@@ -1414,8 +1414,6 @@ function Book() {
     return (
         <ErrorBoundary>
             <div className='min-h-screen bg-[#3c3d3f] text-white'>
-                <Header />
-
                 <div className='bg-white text-black m-6'>
                     {/* Header Section */}
                     <div className='bg-black py-6'>

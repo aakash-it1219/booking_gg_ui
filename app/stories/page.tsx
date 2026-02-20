@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Header from '@/components/header';
+
 import Footer from '@/components/footer';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -43,7 +43,6 @@ export default function StoriesPage() {
             image: '/happy-customer-portrait.png',
         })) || sampleTestimonials;
 
-
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentTestimonialIndex(
@@ -66,8 +65,6 @@ export default function StoriesPage() {
 
     return (
         <div className='min-h-screen bg-[#060608] text-white'>
-            <Header />
-
             {/* Hero Section for Stories */}
             <section className='py-16 bg-[#060608]'>
                 <div className='container mx-auto px-4 text-center'>

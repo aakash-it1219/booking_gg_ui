@@ -68,7 +68,7 @@ export default function Header() {
     return (
         <motion.header
             ref={headerRef}
-            className='bg-[#3c3d3f] border-b border-[#4a4b4d]'
+            className='absolute top-0 left-0 right-0 z-40 bg-transparent'
             initial={{ y: -100 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.6 }}
