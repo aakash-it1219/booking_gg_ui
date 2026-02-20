@@ -162,7 +162,7 @@ export default function Header() {
                 {/* Mobile Navigation */}
                 {mobileMenuOpen && (
                     <motion.nav
-                        className='md:hidden mt-4 pb-4 border-t border-[#4a4b4d] pt-4'
+                        className='md:hidden mt-4 p-4 border-t border-[#4a4b4d] bg-[#060608]'
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
