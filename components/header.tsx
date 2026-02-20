@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Menu, X, User, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RootState } from '@/lib/store';
-import { toggleMobileMenu } from '@/lib/slices/uiSlice';
+import { toggleMobileMenu, setCityPopup } from '@/lib/slices/uiSlice';
 import { logout } from '@/lib/slices/authSlice';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,11 +12,7 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { getLocaleStorage } from '@/lib/utils';
 
-interface HeaderProps {
-    onCityClick?: () => void;
-}
-
-export default function Header({ onCityClick }: HeaderProps) {
+export default function Header() {
     const { cities } = useSelector((state: RootState) => state.city);
     const dispatch = useDispatch();
     const pathname = usePathname();
@@ -74,7 +70,7 @@ export default function Header({ onCityClick }: HeaderProps) {
                                 <button
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        onCityClick?.();
+                                        dispatch(setCityPopup(true));
                                     }}
                                     className='flex items-center gap-1 text-xs px-2 py-1 rounded-full border border-[#fbbf24]/40 bg-[#fbbf24]/10 hover:bg-[#fbbf24]/20 transition-colors cursor-pointer group'
                                     title='Change city'
