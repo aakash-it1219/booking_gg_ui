@@ -9,7 +9,7 @@ import CityPopup from '@/components/city-popup';
 import LayoutShell from '@/components/layout-shell';
 
 const metadata: Metadata = {
-    title: 'Gear Grow Cycles',
+    title: 'Gear Grow Cycle',
     description:
         'Doorstep bicycle maintenance services. Professional bike servicing at your convenience.',
     generator: 'v0.dev',
