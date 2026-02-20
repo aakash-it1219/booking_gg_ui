@@ -1261,7 +1261,7 @@ export function Account() {
                         {[
                             { key: 'profile', label: 'Profile' },
                             { key: 'orders', label: 'My Orders' },
-                            { key: 'settings', label: 'Settings' },
+                            // { key: 'settings', label: 'Settings' },
                         ].map((tab) => (
                             <Button
                                 disabled={tab.key === 'settings'}
