@@ -153,7 +153,7 @@ export default function LoginPage() {
                         />
                     </Link>
 
-                    <div className='space-y-2 p-4 md:p-8 lg:pb-16 bg-black opacity-50 rounded-2xl max-w-xl lg:max-w-4xl'>
+                    <div className='space-y-2 p-4 md:p-8 lg:pb-16 bg-black/50 backdrop-blur-sm rounded-2xl max-w-xl lg:max-w-4xl'>
                         <h1 className='text-4xl md:text-6xl font-bold text-white leading-tight'>
                             Pedal with Peace of mind
                         </h1>
