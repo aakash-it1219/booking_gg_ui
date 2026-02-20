@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { X } from 'lucide-react';
 import type { AppDispatch } from '@/lib/store';
@@ -14,58 +14,68 @@ export default function CityPopup() {
     const showCityPopup = useSelector((state: any) => state.ui.showCityPopup);
 
     const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
+    // Track whether we've done the initial localStorage check
+    const [initialCheckDone, setInitialCheckDone] = useState(false);
 
     // Fetch cities on mount
     useEffect(() => {
         dispatch(getCitiesAction());
     }, [dispatch]);
 
-    // Auto-show popup if no city saved
+    // On mount: if no city saved, show popup
     useEffect(() => {
-        if (!getLocaleStorage('cityId')) {
+        const savedCityId = getLocaleStorage('cityId');
+        if (!savedCityId) {
             dispatch(setCityPopup(true));
         }
+        setInitialCheckDone(true);
     }, [dispatch]);
 
-    // Default select first city
+    // When popup becomes visible, set the selected city:
+    // - If a city is already saved, pre-select it
+    // - Otherwise, default to the first available city
     useEffect(() => {
-        if (cities && cities.length > 0 && selectedCityId === null) {
-            setSelectedCityId(cities[0].id);
-        }
-    }, [cities, selectedCityId]);
-
-    // Pre-select saved city when popup re-opens from header
-    useEffect(() => {
-        if (showCityPopup) {
+        if (showCityPopup && cities && cities.length > 0) {
             const savedCityId = getLocaleStorage('cityId');
             if (savedCityId) {
-                setSelectedCityId(parseInt(savedCityId));
+                const parsedId = parseInt(savedCityId);
+                // Verify the saved city still exists in the list
+                const cityExists = cities.some((c: any) => c.id === parsedId);
+                setSelectedCityId(cityExists ? parsedId : cities[0].id);
+            } else {
+                setSelectedCityId(cities[0].id);
             }
         }
-    }, [showCityPopup]);
+    }, [showCityPopup, cities]);
 
-    const hasSavedCity = !!getLocaleStorage('cityId');
-    const showPopup = showCityPopup || !hasSavedCity;
-
-    const handleClosePopup = () => {
+    const handleConfirm = useCallback(() => {
         if (selectedCityId !== null) {
             setLocaleStorage('cityId', selectedCityId.toString());
             dispatch(setCityPopup(false));
         }
-    };
+    }, [selectedCityId, dispatch]);
 
-    const handleDismissPopup = () => {
+    const handleDismiss = useCallback(() => {
         dispatch(setCityPopup(false));
-    };
+    }, [dispatch]);
 
-    if (!showPopup) return null;
+    // Don't render until initial check is done
+    if (!initialCheckDone) return null;
+
+    // Only show if Redux says to show
+    if (!showCityPopup) return null;
+
+    // Don't show empty popup if cities haven't loaded yet
+    if (!cities || cities.length === 0) return null;
+
+    const hasSavedCity = !!getLocaleStorage('cityId');
 
     return (
         <div className='fixed inset-0 bg-black/60 flex items-center justify-center z-50'>
             <div className='bg-white text-black rounded-lg p-6 min-w-[300px] shadow-lg relative'>
                 {hasSavedCity && (
                     <button
-                        onClick={handleDismissPopup}
+                        onClick={handleDismiss}
                         className='absolute top-3 right-3 p-1 rounded-full hover:bg-gray-200 transition-colors'
                         aria-label='Close'
                     >
@@ -90,8 +100,9 @@ export default function CityPopup() {
                     ))}
                 </div>
                 <button
-                    className='bg-[#000] text-[#fbbf24] px-4 py-2 rounded w-full'
-                    onClick={handleClosePopup}
+                    className='bg-[#000] text-[#fbbf24] px-4 py-2 rounded w-full disabled:opacity-50'
+                    onClick={handleConfirm}
+                    disabled={selectedCityId === null}
                 >
                     Confirm
                 </button>
