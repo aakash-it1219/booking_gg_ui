@@ -103,10 +103,14 @@ function ServicesContent() {
                     index
                 ] as HTMLElement;
                 if (element) {
-                    element.scrollIntoView({
+                    const container = scrollRef.current;
+                    const scrollLeft =
+                        element.offsetLeft -
+                        container.offsetWidth / 2 +
+                        element.offsetWidth / 2;
+                    container.scrollTo({
+                        left: scrollLeft,
                         behavior: 'smooth',
-                        block: 'nearest',
-                        inline: 'center',
                     });
                 }
             }
