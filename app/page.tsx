@@ -152,7 +152,7 @@ export default function HomePage() {
                         <h2 className='text-lg font-semibold mb-4'>
                             Select your city
                         </h2>
-                        <div className='flex flex-row gap-2 mb-4'>
+                        <div className='grid grid-cols-2 gap-2 mb-4'>
                             {cities.map((city: any) => (
                                 <button
                                     key={city.id}
@@ -177,7 +177,15 @@ export default function HomePage() {
                     </div>
                 </div>
             )}
-            <Header />
+            <Header
+                onCityClick={() => {
+                    const savedCityId = getLocaleStorage('cityId');
+                    if (savedCityId) {
+                        setSelectedCityId(parseInt(savedCityId));
+                    }
+                    setShowPopup(true);
+                }}
+            />
             <HeroSection />
             <FeaturesSection />
             <ServicesSection />
