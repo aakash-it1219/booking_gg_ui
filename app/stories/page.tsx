@@ -91,7 +91,7 @@ export default function StoriesPage() {
                     <div className='max-w-4xl mx-auto'>
                         <div className='bg-[#060608] rounded-lg p-8 relative border border-[#4a4b4d]'>
                             <div className='flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-6'>
-                                <Image
+                                {/* <Image
                                     src={
                                         testimonials[currentTestimonialIndex]
                                             .image || '/placeholder.svg'
@@ -103,7 +103,7 @@ export default function StoriesPage() {
                                     width={100}
                                     height={100}
                                     className='rounded-full object-cover flex-shrink-0'
-                                />
+                                /> */}
                                 <div className='flex-1 text-center md:text-left'>
                                     <p className='text-gray-300 text-lg leading-relaxed mb-4'>
                                         {
