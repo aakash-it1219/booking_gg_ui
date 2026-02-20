@@ -1,5 +1,7 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
+
 import { useDispatch, useSelector } from 'react-redux';
 import { Menu, X, User, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,8 +48,26 @@ export default function Header() {
             : city.id === null
     );
 
+    // Close mobile menu when clicking outside header
+    const headerRef = useRef<HTMLElement>(null);
+    useEffect(() => {
+        if (!mobileMenuOpen) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            if (
+                headerRef.current &&
+                !headerRef.current.contains(e.target as Node)
+            ) {
+                dispatch(toggleMobileMenu());
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () =>
+            document.removeEventListener('mousedown', handleClickOutside);
+    }, [mobileMenuOpen, dispatch]);
+
     return (
         <motion.header
+            ref={headerRef}
             className='bg-[#3c3d3f] border-b border-[#4a4b4d]'
             initial={{ y: -100 }}
             animate={{ y: 0 }}
