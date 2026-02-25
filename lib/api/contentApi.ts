@@ -20,19 +20,33 @@ export interface AboutUsData {
     };
 }
 
-export interface ContactDetails {
+export interface ContactAddress {
+    id: number;
     phone: string;
-    email: string;
+    whatsapp: string;
+    location: string;
     address: string;
-    workingHours: string;
-    facebook?: string;
-    twitter?: string;
-    instagram?: string;
-    linkedin?: string;
-    instaPageUrl?: string;
-    fbPageUrl?: string;
-    twitterPageUrl?: string;
-    whatsappPageUrl?: string;
+    city_id: number;
+    is_active: boolean;
+    email: string;
+    label: string;
+}
+
+export interface Socials {
+    id: number;
+    email: string;
+    phone: string;
+    fb_page_url: string;
+    insta_page_url: string;
+    company_website_url: string;
+    linked_in_page_url: string;
+    twitter_page_url: string;
+    you_tube_page_url: string;
+}
+
+export interface ContactDetailsData {
+    contactAddresses: ContactAddress[];
+    socials: Socials;
 }
 
 export interface HomePageData {
@@ -88,11 +102,15 @@ export const contentApi = {
         return response.data;
     },
 
-    getContactDetails: async (): Promise<{
+    getContactDetails: async (
+        city_id?: number
+    ): Promise<{
         success: boolean;
-        data: ContactDetails;
+        data: ContactDetailsData;
     }> => {
-        const response = await apiClient.get('/contact/getContactDetails');
+        const response = await apiClient.get('/contact/getContactDetails', {
+            params: city_id ? { city_id } : {},
+        });
         return response.data;
     },
 
