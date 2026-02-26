@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { City } from './cityApi';
 
 export interface AboutUsData {
     title: string;
@@ -47,6 +48,7 @@ export interface Socials {
 export interface ContactDetailsData {
     contactAddresses: ContactAddress[];
     socials: Socials;
+    cities: City[];
 }
 
 export interface HomePageData {
