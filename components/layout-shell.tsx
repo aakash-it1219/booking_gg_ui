@@ -55,8 +55,8 @@ export default function LayoutShell({
     const { selectedCityId } = useSelector((state: RootState) => state.city);
 
     useEffect(() => {
-        dispatch(getContactDetailsAction(selectedCityId ?? undefined));
-    }, [dispatch, selectedCityId]);
+        dispatch(getContactDetailsAction());
+    }, [dispatch]);
 
     return (
         <div className='relative'>
