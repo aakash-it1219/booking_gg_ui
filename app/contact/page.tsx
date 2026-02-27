@@ -64,7 +64,7 @@ export default function ContactPage() {
     return (
         <div className='min-h-screen bg-[#060608] text-white'>
             <div className='min-h-screen bg-black px-4 py-10 text-white flex justify-center pt-32'>
-                <div className='w-full max-w-2xl space-y-6'>
+                <div className='w-full max-w-2xl space-y-6 grid grid-cols-1 md:grid-cols-2 gap-6'>
                     {/* Render each contact address */}
                     {contactAddresses?.map((contact: ContactAddress) => (
                         <div
@@ -72,13 +72,13 @@ export default function ContactPage() {
                             className='bg-zinc-900 border-2 border-yellow-400 shadow-[0_0_15px_#facc15] p-6'
                         >
                             {/* Logo */}
-                            <div className='flex justify-center mb-4'>
+                            {/* <div className='flex justify-center mb-4'>
                                 <img
                                     src='/images/logo.png'
                                     alt='logo'
                                     className='w-24'
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Label */}
                             {contact.label && (
@@ -144,6 +144,10 @@ export default function ContactPage() {
                     ))}
 
                     {/* Social Links (shared across all addresses) */}
+                </div>
+            </div>
+            <div className='bg-black flex justify-center py-6'>
+                <div className='w-full max-w-2xl space-y-6'>
                     {socials && (
                         <div className='bg-zinc-900 border-2 border-yellow-400 shadow-[0_0_15px_#facc15] p-6'>
                             <Section title='Follow and know more about us'>
