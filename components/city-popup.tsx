@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import type { AppDispatch } from '@/lib/store';
 import { setCityPopup } from '@/lib/slices/uiSlice';
 import { setSelectedCityId as setReduxCityId } from '@/lib/slices/citySlice';
+import { getServicesAction } from '@/lib/actions/serviceActions';
 
 import { getLocaleStorage, setLocaleStorage } from '@/lib/utils';
 
@@ -50,6 +51,7 @@ export default function CityPopup() {
         if (selectedCityId !== null) {
             setLocaleStorage('cityId', selectedCityId.toString());
             dispatch(setReduxCityId(selectedCityId));
+            dispatch(getServicesAction({ city: selectedCityId }));
             dispatch(setCityPopup(false));
         }
     }, [selectedCityId, dispatch]);
@@ -86,11 +88,10 @@ export default function CityPopup() {
                     {cities.map((city: any) => (
                         <button
                             key={city.id}
-                            className={`w-full p-2 border rounded ${
-                                selectedCityId === city.id
+                            className={`w-full p-2 border rounded ${selectedCityId === city.id
                                     ? 'bg-[#fbbf24] text-white border-blue-600'
                                     : 'bg-white text-black border-gray-300'
-                            }`}
+                                }`}
                             onClick={() => setSelectedCityId(city.id)}
                             type='button'
                         >
