@@ -98,20 +98,26 @@ function ServicesContent() {
     }, [dispatch, selectedCityId]);
 
     useEffect(() => {
-        if (activeServices.length > 0 && selectedServiceId === null) {
-            const serviceName = searchParams.get('service');
-            if (serviceName) {
-                const service = activeServices.find(
-                    (s) =>
-                        s.serviceName.toLowerCase() ===
-                        serviceName.toLowerCase()
-                );
-                if (service) {
-                    setSelectedServiceId(service._id);
-                    return;
+        if (activeServices.length > 0) {
+            const isValidSelection = selectedServiceId !== null && activeServices.some(s => s._id === selectedServiceId);
+
+            if (!isValidSelection) {
+                const serviceName = searchParams.get('service');
+                if (serviceName) {
+                    const service = activeServices.find(
+                        (s) =>
+                            s.serviceName.toLowerCase() ===
+                            serviceName.toLowerCase()
+                    );
+                    if (service) {
+                        setSelectedServiceId(service._id);
+                        return;
+                    }
                 }
+                setSelectedServiceId(activeServices[0]._id);
             }
-            setSelectedServiceId(activeServices[0]._id);
+        } else if (activeServices.length === 0 && selectedServiceId !== null) {
+            setSelectedServiceId(null);
         }
     }, [activeServices, selectedServiceId, searchParams]);
 
@@ -201,11 +207,10 @@ function ServicesContent() {
                                 onClick={() =>
                                     setSelectedServiceId(service._id)
                                 }
-                                className={`px-6 py-3 rounded-full border-2 transition-all duration-300 whitespace-nowrap ${
-                                    selectedServiceId === service._id
+                                className={`px-6 py-3 rounded-full border-2 transition-all duration-300 whitespace-nowrap ${selectedServiceId === service._id
                                         ? 'bg-[#fbbf24] text-black border-[#fbbf24]'
                                         : 'bg-[#19191a] text-white border-[#fbbf24] hover:bg-[#fbbf24] hover:text-black'
-                                }`}
+                                    }`}
                             >
                                 {service.serviceName}
                             </button>
@@ -268,11 +273,10 @@ function ServicesContent() {
                         <div className='flex lg:ml-88 justify-center mt-12'>
                             <div className='bg-[#3c3d3f] rounded-full p-2 flex items-center space-x-4 border border-[#4a4b4d]'>
                                 <span
-                                    className={`px-4 py-2 rounded-full transition-colors ${
-                                        !hasGear
+                                    className={`px-4 py-2 rounded-full transition-colors ${!hasGear
                                             ? 'text-gray-400'
                                             : 'text-white'
-                                    }`}
+                                        }`}
                                 >
                                     Gear
                                 </span>
@@ -284,9 +288,8 @@ function ServicesContent() {
                                     className='data-[state=checked]:bg-[#fbbf24]'
                                 />
                                 <span
-                                    className={`px-4 py-2 rounded-full transition-colors ${
-                                        hasGear ? 'text-gray-400' : 'text-white'
-                                    }`}
+                                    className={`px-4 py-2 rounded-full transition-colors ${hasGear ? 'text-gray-400' : 'text-white'
+                                        }`}
                                 >
                                     Non-Gear
                                 </span>
