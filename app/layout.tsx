@@ -1,14 +1,12 @@
-'use client';
 import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
-import { Provider } from 'react-redux';
-import { store } from '@/lib/store';
+import { Providers } from './providers';
 import CityPopup from '@/components/city-popup';
 import LayoutShell from '@/components/layout-shell';
 
-const metadata: Metadata = {
+export const metadata: Metadata = {
     title: 'Gear Grow Cycle',
     description:
         'Doorstep bicycle maintenance services. Professional bike servicing at your convenience.',
@@ -22,15 +20,11 @@ export default function RootLayout({
 }>) {
     return (
         <html lang='en'>
-            <head>
-                <title>Gear Grow Cycle</title>
-                <link rel='icon' href='/images/logo.png' />
-            </head>
             <body>
-                <Provider store={store}>
+                <Providers>
                     <CityPopup />
                     <LayoutShell>{children}</LayoutShell>
-                </Provider>
+                </Providers>
             </body>
         </html>
     );
