@@ -18,6 +18,9 @@ export async function generateMetadata(
     return {
         title: `${serviceFormatted} in ${cityCapitalized} | Gear Grow Cycle`,
         description: `Book professional ${serviceFormatted} in ${cityCapitalized}. Doorstep bicycle maintenance and repair services at your location.`,
+        alternates: {
+            canonical: `https://booking.geargrowcycle.com/services/${params.city}/${params.service}`,
+        },
     };
 }
 

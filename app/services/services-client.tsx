@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
 import { RootState, AppDispatch } from '@/lib/store';
 import { getServicesAction } from '@/lib/actions/serviceActions';
-import { setReduxCityId } from '@/lib/slices/citySlice';
+import { setSelectedCityId } from '@/lib/slices/citySlice';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface ServicePrice {
@@ -115,7 +115,7 @@ export default function ServicesClient({
                 if (typeof window !== 'undefined') {
                     window.localStorage.setItem('cityId', urlCity.id.toString());
                 }
-                dispatch(setReduxCityId(urlCity.id));
+                dispatch(setSelectedCityId(urlCity.id));
             }
             lastUrlCitySlug.current = citySlug;
             lastReduxCityId.current = urlCity.id;
@@ -125,7 +125,7 @@ export default function ServicesClient({
             if (typeof window !== 'undefined') {
                 window.localStorage.setItem('cityId', urlCity.id.toString());
             }
-            dispatch(setReduxCityId(urlCity.id));
+            dispatch(setSelectedCityId(urlCity.id));
             lastReduxCityId.current = urlCity.id;
             lastUrlCitySlug.current = citySlug;
         }
