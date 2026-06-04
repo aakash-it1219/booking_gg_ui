@@ -11,6 +11,21 @@ export const metadata: Metadata = {
     description:
         'Professional doorstep bicycle maintenance and repair services at your location. We serve Pune, Bengaluru, Mumbai, Vishakhapatnam, Hyderabad, Chennai, and Navi Mumbai.',
     keywords: 'bicycle repair, doorstep bike service, cycle maintenance, Pune, Bengaluru, Mumbai, Vishakhapatnam, Hyderabad, Chennai, Navi Mumbai',
+    openGraph: {
+        title: 'Gear Grow Cycle | Doorstep Bicycle Service & Repair',
+        description: 'Professional doorstep bicycle maintenance and repair services at your location. We serve major cities across India.',
+        url: 'https://booking.geargrowcycle.com',
+        siteName: 'Gear Grow Cycle',
+        images: [
+            {
+                url: 'https://booking.geargrowcycle.com/images/logo.png',
+                width: 800,
+                height: 600,
+            },
+        ],
+        locale: 'en_IN',
+        type: 'website',
+    },
 };
 
 export default function RootLayout({
