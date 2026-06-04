@@ -7,10 +7,10 @@ import CityPopup from '@/components/city-popup';
 import LayoutShell from '@/components/layout-shell';
 
 export const metadata: Metadata = {
-    title: 'Gear Grow Cycle',
+    title: 'Gear Grow Cycle | Doorstep Bicycle Service & Repair',
     description:
-        'Doorstep bicycle maintenance services. Professional bike servicing at your convenience.',
-    generator: 'v0.dev',
+        'Professional doorstep bicycle maintenance and repair services at your location. We serve Pune, Bengaluru, Mumbai, Vishakhapatnam, Hyderabad, Chennai, and Navi Mumbai.',
+    keywords: 'bicycle repair, doorstep bike service, cycle maintenance, Pune, Bengaluru, Mumbai, Vishakhapatnam, Hyderabad, Chennai, Navi Mumbai',
 };
 
 export default function RootLayout({
