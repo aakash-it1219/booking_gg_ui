@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
 import { RootState, AppDispatch } from '@/lib/store';
 import { getServicesAction } from '@/lib/actions/serviceActions';
+import { setReduxCityId } from '@/lib/slices/citySlice';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface ServicePrice {
@@ -50,7 +51,17 @@ const serviceCheckItems = [
     'Brake Levers (Loose & Tightening)',
 ];
 
-export default function ServicesClient({ initialServices }: { initialServices: Service[] }) {
+import { slugify } from '@/lib/utils';
+
+export default function ServicesClient({
+    initialServices,
+    citySlug,
+    serviceSlug
+}: {
+    initialServices: Service[],
+    citySlug?: string,
+    serviceSlug?: string
+}) {
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -68,7 +79,7 @@ export default function ServicesClient({ initialServices }: { initialServices: S
     const isLoading = useSelector(
         (state: RootState) => state.services.isLoading
     );
-    const { selectedCityId } = useSelector((state: RootState) => state.city);
+    const { selectedCityId, cities } = useSelector((state: RootState) => state.city);
 
     const activeServicesSource = reduxServices && reduxServices.length > 0 ? reduxServices : initialServices;
 
@@ -77,35 +88,77 @@ export default function ServicesClient({ initialServices }: { initialServices: S
             ?.filter((service: Service) => service.isActive)
             .sort((a: Service, b: Service) => a.orderNo - b.orderNo) || [];
 
+    const lastReduxCityId = useRef(selectedCityId);
+    const lastUrlCitySlug = useRef(citySlug);
+
+    // Bidirectional sync between URL and Redux
     useEffect(() => {
-        if (selectedCityId !== null) {
-            dispatch(getServicesAction({ city: selectedCityId }));
+        if (!citySlug || !cities || cities.length === 0) return;
+
+        const urlCity = cities.find((c: any) => slugify(c.name) === citySlug);
+        if (!urlCity) return;
+
+        // If Redux changed (e.g., user selected a new city from CityPopup)
+        if (selectedCityId !== lastReduxCityId.current && selectedCityId !== null) {
+            if (urlCity.id !== selectedCityId) {
+                const newCity = cities.find((c: any) => c.id === selectedCityId);
+                if (newCity) {
+                    router.replace(`/services/${slugify(newCity.name)}/${serviceSlug || 'standard-service'}`);
+                }
+            }
+            lastReduxCityId.current = selectedCityId;
+            lastUrlCitySlug.current = slugify(cities.find((c: any) => c.id === selectedCityId)?.name || '');
+        } 
+        // If URL changed (e.g., user navigated to a new URL)
+        else if (citySlug !== lastUrlCitySlug.current) {
+            if (urlCity.id !== selectedCityId) {
+                if (typeof window !== 'undefined') {
+                    window.localStorage.setItem('cityId', urlCity.id.toString());
+                }
+                dispatch(setReduxCityId(urlCity.id));
+            }
+            lastUrlCitySlug.current = citySlug;
+            lastReduxCityId.current = urlCity.id;
         }
-    }, [dispatch, selectedCityId]);
+        // Handle initial load mismatch: The URL is the source of truth!
+        else if (selectedCityId !== null && urlCity.id !== selectedCityId) {
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem('cityId', urlCity.id.toString());
+            }
+            dispatch(setReduxCityId(urlCity.id));
+            lastReduxCityId.current = urlCity.id;
+            lastUrlCitySlug.current = citySlug;
+        }
+    }, [citySlug, cities, selectedCityId, serviceSlug, router, dispatch]);
+
+    // We rely on initialServices from SSR and CityPopup for fetching new cities.
+    // No need to dispatch getServicesAction on mount or route change here.
 
     useEffect(() => {
         if (activeServices.length > 0) {
-            const isValidSelection = selectedServiceId !== null && activeServices.some(s => s._id === selectedServiceId);
+            let matchedService = null;
 
-            if (!isValidSelection) {
+            // First try matching dynamic route slug
+            if (serviceSlug) {
+                matchedService = activeServices.find(s => slugify(s.serviceName) === serviceSlug);
+            }
+            // Fallback to legacy query param
+            else {
                 const serviceName = searchParams.get('service');
                 if (serviceName) {
-                    const service = activeServices.find(
-                        (s) =>
-                            s.serviceName.toLowerCase() ===
-                            serviceName.toLowerCase()
-                    );
-                    if (service) {
-                        setSelectedServiceId(service._id);
-                        return;
-                    }
+                    matchedService = activeServices.find(s => s.serviceName.toLowerCase() === serviceName.toLowerCase());
                 }
+            }
+
+            if (matchedService) {
+                setSelectedServiceId(matchedService._id);
+            } else if (selectedServiceId === null) {
                 setSelectedServiceId(activeServices[0]._id);
             }
         } else if (activeServices.length === 0 && selectedServiceId !== null) {
             setSelectedServiceId(null);
         }
-    }, [activeServices, selectedServiceId, searchParams]);
+    }, [activeServices, selectedServiceId, serviceSlug, searchParams]);
 
     useEffect(() => {
         if (selectedServiceId && scrollRef.current) {
@@ -190,12 +243,15 @@ export default function ServicesClient({ initialServices }: { initialServices: S
                         {activeServices.map((service: Service) => (
                             <button
                                 key={service._id}
-                                onClick={() =>
-                                    setSelectedServiceId(service._id)
-                                }
+                                onClick={() => {
+                                    const cSlug = citySlug || (cities && cities.find((c: any) => c.id === selectedCityId)
+                                        ? slugify(cities?.find((c: any) => c.id === selectedCityId)?.name || 'pune')
+                                        : 'pune');
+                                    router.push(`/services/${cSlug}/${slugify(service.serviceName)}`);
+                                }}
                                 className={`px-6 py-3 rounded-full border-2 transition-all duration-300 whitespace-nowrap ${selectedServiceId === service._id
-                                        ? 'bg-[#fbbf24] text-black border-[#fbbf24]'
-                                        : 'bg-[#19191a] text-white border-[#fbbf24] hover:bg-[#fbbf24] hover:text-black'
+                                    ? 'bg-[#fbbf24] text-black border-[#fbbf24]'
+                                    : 'bg-[#19191a] text-white border-[#fbbf24] hover:bg-[#fbbf24] hover:text-black'
                                     }`}
                             >
                                 {service.serviceName}
@@ -259,8 +315,8 @@ export default function ServicesClient({ initialServices }: { initialServices: S
                             <div className='bg-[#3c3d3f] rounded-full p-2 flex items-center space-x-4 border border-[#4a4b4d]'>
                                 <span
                                     className={`px-4 py-2 rounded-full transition-colors ${!hasGear
-                                            ? 'text-gray-400'
-                                            : 'text-white'
+                                        ? 'text-gray-400'
+                                        : 'text-white'
                                         }`}
                                 >
                                     Gear

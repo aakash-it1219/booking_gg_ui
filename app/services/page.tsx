@@ -1,28 +1,41 @@
-import { Suspense } from 'react';
-import ServicesClient, { Service } from './services-client';
+'use client';
 
-export default async function ServicesPage() {
-    let initialServices: Service[] = [];
-    try {
-        // Default to city ID 3 (Pune) for pre-rendering purposes
-        const res = await fetch('https://apiweb.geargrowcycle.com/api/service/getServices?city=3', { next: { revalidate: 3600 } });
-        const json = await res.json();
-        if (json && json.data) {
-            initialServices = json.data;
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '@/lib/store';
+import { setCityPopup } from '@/lib/slices/uiSlice';
+import { slugify, getLocaleStorage } from '@/lib/utils';
+
+export default function ServicesBasePage() {
+    const router = useRouter();
+    const dispatch = useDispatch<AppDispatch>();
+    const { cities, selectedCityId } = useSelector((state: RootState) => state.city);
+    const showCityPopup = useSelector((state: RootState) => state.ui.showCityPopup);
+
+    useEffect(() => {
+        const savedCityId = getLocaleStorage('cityId') || selectedCityId;
+        
+        if (!savedCityId) {
+            // If no city is selected, force the popup to open
+            dispatch(setCityPopup(true));
+        } else if (cities && cities.length > 0) {
+            // We have a city, find its slug and redirect to the city's base services page
+            // The [city]/page.tsx will dynamically handle finding the first service.
+            const userCity = cities.find((c: any) => c.id === parseInt(savedCityId.toString()));
+            if (userCity) {
+                router.replace(`/services/${slugify(userCity.name)}`);
+            }
         }
-    } catch (error) {
-        console.error('Failed to fetch initial services for SSR:', error);
-    }
+    }, [selectedCityId, cities, dispatch, router]);
 
     return (
-        <Suspense
-            fallback={
-                <div className='min-h-screen bg-[#060608] text-white flex justify-center items-center'>
-                    Loading services...
-                </div>
-            }
-        >
-            <ServicesClient initialServices={initialServices} />
-        </Suspense>
+        <div className='min-h-screen bg-[#060608] text-white flex justify-center items-center'>
+            <p className='text-xl text-[#fbbf24] animate-pulse'>
+                {!getLocaleStorage('cityId') && !selectedCityId 
+                    ? 'Please select a city to view services...' 
+                    : 'Loading services...'}
+            </p>
+        </div>
     );
 }

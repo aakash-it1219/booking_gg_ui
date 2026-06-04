@@ -4,7 +4,7 @@ import HomeClient from './home-client';
 export default async function HomePage() {
     let initialHomePageData = null;
     try {
-        const res = await fetch('https://apiweb.geargrowcycle.com/api/v1/landingPage/getHomePageData', { next: { revalidate: 3600 } });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/v1/landingPage/getHomePageData`, { next: { revalidate: 3600 } });
         const json = await res.json();
         if (json && json.data) {
             initialHomePageData = json.data;
