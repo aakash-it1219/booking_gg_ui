@@ -1200,7 +1200,7 @@ function Book() {
                                             (position) => {
                                                 const { latitude, longitude } =
                                                     position.coords;
-                                                const longLat = `${longitude},${latitude}`;
+                                                const longLat = `${latitude},${longitude}`;
                                                 setCustomer((prev) => ({
                                                     ...prev,
                                                     longLat,
